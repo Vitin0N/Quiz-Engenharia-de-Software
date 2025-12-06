@@ -4,6 +4,8 @@ from getQuestions import get_questions
 from initialWindow import initial_choice
 from random import sample
 
+st.set_page_config('Quiz Eng. de Software I', page_icon='🕹️')
+
 def reiniciar_jogo():
     for key in list(st.session_state.keys()):
         del st.session_state[key]
@@ -40,6 +42,8 @@ if not st.session_state.config:
         
         st.session_state.randIndice = sample(range(0, len(st.session_state.dadosFiltrados)), st.session_state.numQuestoes)
 
+        st.session_state.respondeu = False
+
         st.session_state.indice = 0
         st.session_state.pontos = 0
         st.session_state.config = True
@@ -75,7 +79,14 @@ pergunta_atual = st.session_state.dadosFiltrados[st.session_state.randIndice[ind
 progresso = (st.session_state.indice) / st.session_state.numQuestoes
 st.progress(progresso, text=f'Questão {st.session_state.indice + 1} de {st.session_state.numQuestoes}')
 
-st.subheader(f"Tópico: {pergunta_atual['Tópico da questão']}")
+head1, head2 = st.columns([4,1])
+
+with head1:
+    st.subheader(f"Tópico: {pergunta_atual['Tópico da questão']}")
+
+with head2:
+    if st.button('Reiniciar'):
+        reiniciar_jogo()
 
 with st.container(border=True):
     st.markdown(f'### {pergunta_atual['Questão']}')
@@ -87,14 +98,15 @@ col1, col2 = st.columns(2)
 resposta_usuario = None
 
 with col1:
-    if st.button('VERDADEIRA ✅', use_container_width=True):
+    if st.button('VERDADEIRA ✅', use_container_width=True, disabled=st.session_state.respondeu):
         resposta_usuario = 'Verdadeira'
 
 with col2:
-    if st.button('FALSA ❌', use_container_width=True):
+    if st.button('FALSA ❌', use_container_width=True, disabled=st.session_state.respondeu):
         resposta_usuario = 'Falsa'
 
 if resposta_usuario:
+    st.session_state.respondeu = True
     resposta_certa = pergunta_atual['Resposta'].strip()
 
     if resposta_usuario.lower() == resposta_certa.lower():
@@ -107,7 +119,9 @@ if resposta_usuario:
 
     if st.session_state.indice + 1 < st.session_state.numQuestoes:
         st.session_state.indice += 1
+        st.session_state.respondeu = False
         st.rerun()
     else:
         st.session_state.gameOver = True
+        st.session_state.respondeu = False
         st.rerun()
