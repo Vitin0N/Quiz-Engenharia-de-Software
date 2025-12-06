@@ -58,16 +58,30 @@ if st.session_state.gameOver:
     total = st.session_state.numQuestoes
     acertos = st.session_state.pontos
 
+    pontos_porcent = acertos / total if acertos <= total else 0
+
     st.metric('Pontuação final', f'{acertos}/{total}')
+
+    col1, col2 = st.columns([3,1])
+
+    with col1:
+        st.progress(pontos_porcent)
+    with col2:
+        st.write(f'Você acertou {pontos_porcent*100}%')
 
     if acertos == total:
         st.success("Parabéns! Você gabaritou! 🤓")
+    elif acertos > total:
+        st.error("Como tu ganhou mais pontos que questões feitas, já ta baguçando já boy...\n" 
+                "NÃO APERTE O BOTÃO DE RESPOSTA VÁRIAS VEZES DA PROXIMA VEZ!!!")   
+    elif acertos / total >= 0.7:
+        st.info("Mandou bem!")   
     elif acertos > total / 2:
-        st.info("Mandou bem!")
+        st.info("Podemos melhorar, eu confio!")
     else:
         st.warning("Precisa estudar mais um pouco...")
         
-    if st.button("Jogar Novamente"):
+    if st.button("Reiniciar Quiz"):
         reiniciar_jogo()
     
     st.stop()
