@@ -4,6 +4,18 @@ Um aplicativo web simples e divertido, construído com **Streamlit**, para simul
 
 -----
 
+
+## 🕹️ Jogue o Quiz Agora\!
+
+Para iniciar o questionário interativo de Engenharia de Software, clique no botão abaixo:
+
+[![Abrir Quiz](https://img.shields.io/badge/Abrir%20quiz-00A4CC?style=for-the-badge&logo=streamlit&logoColor=white)](https://quiz-engenharia-de-software.streamlit.app/)
+
+**Ou acesse diretamente:** [https://quiz-engenharia-de-software.streamlit.app/](https://quiz-engenharia-de-software.streamlit.app/)
+
+-----
+
+
 ## ✨ Funcionalidades
 
   * **Configuração Personalizada:** O usuário pode escolher quais capítulos deseja incluir no quiz e definir o número de questões.
