@@ -82,7 +82,7 @@ if st.session_state.gameOver:
     with col1:
         st.progress(pontos_porcent) # Barra de porcentagem de questões acertadas
     with col2:
-        st.write(f'Você acertou {pontos_porcent*100}%')
+        st.write(f'Você acertou {pontos_porcent*100:.1f}%')
 
     if acertos == total:
         st.success("Parabéns! Você gabaritou! 🤓")
