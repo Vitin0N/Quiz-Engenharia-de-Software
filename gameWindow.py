@@ -14,6 +14,7 @@ def reiniciar_jogo():
     st.session_state.gameOver = False
     st.session_state.capitulos = []
     st.session_state.numQuestoes = 0
+    st.session_state.erros = []
 
     st.rerun()
 
@@ -55,6 +56,7 @@ if not st.session_state.config:
         st.session_state.respondeu = False
 
         st.session_state.indice = 0
+        st.session_state.erros = []
         st.session_state.pontos = 0
         st.session_state.config = True
         st.rerun()
@@ -98,6 +100,18 @@ if st.session_state.gameOver:
         
     if st.button("Reiniciar Quiz"):
         reiniciar_jogo()
+
+    if len(st.session_state.erros):
+        st.markdown("# Questões erradas: ")
+    for i in st.session_state.erros:
+        pergunta_atual = st.session_state.dadosFiltrados[st.session_state.randIndice[i]]
+        with st.container():
+            st.markdown(f'---\n' + 
+                        f'### {pergunta_atual['Questão']}\n' + 
+                        f'#### **Resposta:** {pergunta_atual['Resposta']}\n  ' +
+                        f'---'
+                        )
+
     
     st.stop()
 
@@ -151,6 +165,7 @@ if resposta_usuario: # Caso o usuário tiver respondido sistema verifica
         time.sleep(0.7) # Tempo de espera para próxima pergunta
     else:
         st.toast(f"Errou! Era {resposta_certa}.", icon="❌")
+        st.session_state.erros.append(st.session_state.indice) # Adiciona o Indice da questão errada.
         time.sleep(1.5) # Tempo de espera para próxima pergunta
 
     #========================================
