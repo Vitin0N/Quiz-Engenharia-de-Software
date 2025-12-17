@@ -70,8 +70,10 @@ if st.session_state.gameOver:
     st.balloons()
     st.title("🏆 Fim de Jogo!")
 
+    # Total de perguntas selecionadas
     total = st.session_state.numQuestoes
-    acertos = st.session_state.pontos
+    # Numero de acertos (mas só mostra se o numero de acertos não for maior que o total)
+    acertos = st.session_state.pontos if st.session_state.pontos <= total else 0
 
     # Porcentagens de pontos feitos (caso maior que o número de questões é zerado)
     pontos_porcent = acertos / total if acertos <= total else 0
