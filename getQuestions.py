@@ -1,13 +1,13 @@
 import pandas as pd
-import os
+import streamlit as st
 
 def get_questions():
     '''
     Busca os registros das perguntas no banco de questões retirando as questões testes de Alan
     retorna uma lista de dicionários (formato padrão JSON) 
     '''
-    sheet_id = os.getenv("SHEET_ID")
-    sheet_gid = os.getenv("SHEET_GID")
+    sheet_id = st.secrets["SHEET_ID"]
+    sheet_gid = st.secrets["SHEET_GID"]
 
     url = f'https://docs.google.com/spreadsheets/d/{sheet_id}/export?format=csv&gid={sheet_gid}'
 
