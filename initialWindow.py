@@ -10,7 +10,7 @@ def initial_choice(max_value):
 
     # Lista de Cápitulos escolhido pelo o usuário
     escolhas_cap = st.pills(label='Qual cápitulo deseja simular a prova', 
-                            options=['Capítulo 1', 'Capítulo 2'], 
+                            options=['Capítulo 1', 'Capítulo 2', 'Capítulo 3'], 
                             selection_mode='multi')
     
     # Número de questão simuladas pelo o usuário
