@@ -111,7 +111,7 @@ if st.session_state.gameOver:
         with st.container():
             st.markdown(f'### {pergunta_atual['Questão']}\n' + 
                         f'#### **Resposta:** {pergunta_atual['Resposta']}\n  ' +
-                        f'Referência: \n {pergunta_atual['Citações e referências']}' +
+                        f'Referência: \n {pergunta_atual['Citações e referências']}\n' +
                         f'---'
                         )
 
