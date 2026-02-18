@@ -110,16 +110,16 @@ if st.session_state.gameOver:
         pergunta_atual = st.session_state.dadosFiltrados[st.session_state.randIndice[i]]
         with st.container():
             st.markdown(f"""
-            ## Questão: 
-            {pergunta_atual['Questão']}
-                        
-            ### Resposta: {pergunta_atual['Resposta']}
-                        
-            #### Referência:
-            {pergunta_atual['Citações e referências']}
+## Questão: 
+{pergunta_atual['Questão']}
+            
+### Resposta: {pergunta_atual['Resposta']}
+            
+#### Referência:
+{pergunta_atual['Citações e referências']}
 
-            ---
-            """)
+---
+""")
 
     
     st.stop()
