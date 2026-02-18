@@ -13,7 +13,6 @@ def initial_choice(max_value):
                             options=['Capítulo 1', 'Capítulo 2', 'Capítulo 3', 'Capítulo 5', 'Capítulo 7'], 
                             selection_mode='multi')
     
-    st.write(escolhas_cap, "Capítulo 1', 'Capítulo 2', 'Capítulo 3', 'Capítulo 5', 'Capítulo 7")
     
     # Número de questão simuladas pelo o usuário
     num_questoes = st.number_input(label=f'Escolha o número de questões para simular. Max({max_value})', 
