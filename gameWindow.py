@@ -104,13 +104,14 @@ if st.session_state.gameOver:
         reiniciar_jogo()
 
     if len(st.session_state.erros):
-        st.markdown("# Questões erradas: ")
+        st.markdown("# Questões erradas: \n"+
+                    "---\n")
     for i in st.session_state.erros:
         pergunta_atual = st.session_state.dadosFiltrados[st.session_state.randIndice[i]]
         with st.container():
-            st.markdown(f'---\n' + 
-                        f'### {pergunta_atual['Questão']}\n' + 
+            st.markdown(f'### {pergunta_atual['Questão']}\n' + 
                         f'#### **Resposta:** {pergunta_atual['Resposta']}\n  ' +
+                        f'Referência: \n {pergunta_atual['Citações e referências']}' +
                         f'---'
                         )
 
