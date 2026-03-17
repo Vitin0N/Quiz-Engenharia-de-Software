@@ -13,10 +13,41 @@ def reiniciar_jogo():
     st.session_state.config = False
     st.session_state.gameOver = False
     st.session_state.capitulos = []
+    st.session_state.respondidos = []
     st.session_state.numQuestoes = 0
     st.session_state.erros = []
 
     st.rerun()
+
+def responder(resposta):
+    if st.session_state.respondidos[st.session_state.indice]:
+        return
+    
+    st.session_state.respondeu = True
+    st.session_state.respondidos[st.session_state.indice] = True
+    resposta_certa = pergunta_atual['Resposta'].strip()
+
+    if resposta.lower() == resposta_certa.lower():
+        st.session_state.ultimo_toast = ("Acertou! 🎉", "✅")
+        st.session_state.pontos += 1
+    else:
+        st.session_state.ultimo_toast = ("Errou! 😥", "❌")
+        st.session_state.respostas[st.session_state.indice] = False
+        st.session_state.erros.append(st.session_state.indice)
+
+    #========================================
+    # Definir próxima pergunta ou fim de jogo
+    #========================================
+
+    # Caso ainda tenha alguma pergunta para responder o Quiz continua
+    if st.session_state.indice + 1 < st.session_state.numQuestoes: # Vai para próxima pergunta
+        st.session_state.respondeu = False # Define a próxima pergunta como não respondida
+
+    # Caso não tenha mais questões inicializa a tela de Fim de Jogo
+    else: 
+        st.session_state.gameOver = True
+        st.session_state.respondeu = False
+
 
 
 #=============================================
@@ -56,6 +87,8 @@ if not st.session_state.config:
         st.session_state.respondeu = False
 
         st.session_state.indice = 0
+        st.session_state.respondidos = [False for i in range(st.session_state.numQuestoes)]
+        st.session_state.respostas = [True for i in range(st.session_state.numQuestoes)] # repostas corretas ou falsas
         st.session_state.erros = []
         st.session_state.pontos = 0
         st.session_state.config = True
@@ -150,45 +183,61 @@ st.write('Essa afirmação é:')
 
 col1, col2 = st.columns(2) # Colunas onde fica alocados os botões de resposta
 
-resposta_usuario = None
+ant, prox = st.columns(2) # Colunas onde ficam o anterior e o proximo
+
+# resposta_usuario = None
+
+ja_respondeu = st.session_state.respondeu or st.session_state.respondidos[st.session_state.indice]
 
 with col1: # Botão de resposta verdadeira
-    if st.button('VERDADEIRA ✅', use_container_width=True, disabled=st.session_state.respondeu):
-        resposta_usuario = 'Verdadeira'
+    st.button('VERDADEIRA ✅', 
+                use_container_width=True, 
+                disabled=ja_respondeu,
+                on_click=responder,
+                args=('verdadeira',)
+            )
 
 with col2: # Botão de resposta verdadeira
-    if st.button('FALSA ❌', use_container_width=True, disabled=st.session_state.respondeu):
-        resposta_usuario = 'Falsa'
+    st.button('FALSA ❌', 
+                use_container_width=True, 
+                disabled=ja_respondeu,
+                on_click=responder,
+                args=('falsa',)
+                )
 
-#===================================
-# Verificação da resposta do usuário
-#===================================
-if resposta_usuario: # Caso o usuário tiver respondido sistema verifica
-    
-    st.session_state.respondeu = True # Deixa a questão como respondidda
-    resposta_certa = pergunta_atual['Resposta'].strip()
+# Toast de validação da resposta
+if 'ultimo_toast' in st.session_state and st.session_state.ultimo_toast:
+    msg, icon = st.session_state.ultimo_toast
+    st.toast(msg, icon=icon)
+    st.session_state.ultimo_toast = None
 
-    if resposta_usuario.lower() == resposta_certa.lower():
-        st.toast("Acertou! 🎉", icon="✅")
-        st.session_state.pontos += 1
-        time.sleep(0.7) # Tempo de espera para próxima pergunta
-    else:
-        st.toast(f"Errou! Era {resposta_certa}.", icon="❌")
-        st.session_state.erros.append(st.session_state.indice) # Adiciona o Indice da questão errada.
-        time.sleep(1.5) # Tempo de espera para próxima pergunta
 
-    #========================================
-    # Definir próxima pergunta ou fim de jogo
-    #========================================
+with ant: # Botão de anterior
+    if st.button("Anterior", use_container_width=True, disabled=(st.session_state.indice == 0)):
+        st.session_state.indice -= 1
+        st.rerun()
 
-    # Caso ainda tenha alguma pergunta para responder o Quiz continua
-    if st.session_state.indice + 1 < st.session_state.numQuestoes: # Vai para próxima pergunta
+with prox: # Botão proximo
+    if st.button("Próximo", use_container_width=True, disabled=(st.session_state.respondidos[st.session_state.indice] == False)):
         st.session_state.indice += 1
-        st.session_state.respondeu = False # Define a próxima pergunta como não respondida
         st.rerun()
 
-    # Caso não tenha mais questões inicializa a tela de Fim de Jogo
-    else: 
-        st.session_state.gameOver = True
-        st.session_state.respondeu = False
-        st.rerun()
+# Mostra a reposta correta caso a pessoa tenha errado
+if(not st.session_state.respostas[st.session_state.indice]):
+    pergunta_atual = st.session_state.dadosFiltrados[st.session_state.randIndice[st.session_state.indice]]
+
+    with st.container():
+                st.markdown(f"""
+---
+                            
+## Questão: 
+{pergunta_atual['Questão']}
+            
+### Resposta: {pergunta_atual['Resposta']}
+            
+#### Referência:
+{pergunta_atual['Citações e referências']}
+
+---
+""")
+
