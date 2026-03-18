@@ -19,6 +19,9 @@ def reiniciar_jogo():
 
     st.rerun()
 
+#===========================================
+# Função para processar resposta do usuário
+#===========================================
 def responder(resposta):
     if st.session_state.respondidos[st.session_state.indice]:
         return
@@ -28,9 +31,11 @@ def responder(resposta):
     resposta_certa = pergunta_atual['Resposta'].strip()
 
     if resposta.lower() == resposta_certa.lower():
+        # Caso resposta correta assiona o toast de acerto e aumenta os pontos
         st.session_state.ultimo_toast = ("Acertou! 🎉", "✅")
         st.session_state.pontos += 1
     else:
+        # Caso errado assiona o toast de erro e coloca no indice da pergunta como uma resposta errada (false)
         st.session_state.ultimo_toast = ("Errou! 😥", "❌")
         st.session_state.respostas[st.session_state.indice] = False
         st.session_state.erros.append(st.session_state.indice)
@@ -47,8 +52,6 @@ def responder(resposta):
     else: 
         st.session_state.gameOver = True
         st.session_state.respondeu = False
-
-
 
 #=============================================
 # Inicialização dos dados do banco de questão
@@ -154,13 +157,11 @@ if st.session_state.gameOver:
 ---
 """)
 
-    
     st.stop()
 
 #=====================
 #  Inteface do quiz
 #=====================
-
 indice_atual = st.session_state.indice # Quantas questões foram respondidas
 pergunta_atual = st.session_state.dadosFiltrados[st.session_state.randIndice[indice_atual]] 
 
@@ -185,8 +186,6 @@ col1, col2 = st.columns(2) # Colunas onde fica alocados os botões de resposta
 
 ant, prox = st.columns(2) # Colunas onde ficam o anterior e o proximo
 
-# resposta_usuario = None
-
 ja_respondeu = st.session_state.respondeu or st.session_state.respondidos[st.session_state.indice]
 
 with col1: # Botão de resposta verdadeira
@@ -197,7 +196,7 @@ with col1: # Botão de resposta verdadeira
                 args=('verdadeira',)
             )
 
-with col2: # Botão de resposta verdadeira
+with col2: # Botão de resposta falsa
     st.button('FALSA ❌', 
                 use_container_width=True, 
                 disabled=ja_respondeu,
