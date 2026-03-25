@@ -71,8 +71,11 @@ if not st.session_state.config:
     # Carrega tela de configurações do quiz
     result = initial_choice(len(st.session_state.dados))
 
+    
+
     if result is not None:
-        capitulos, numQuestoes = result # Defiene os capítulos selecionados e o num de questões
+        capitulos, numQuestoes = result # Define os capítulos selecionados e o num de questões
+
 
         st.session_state.capitulos = capitulos
 
@@ -82,6 +85,9 @@ if not st.session_state.config:
         # Verifica se tem uma quantidade de questões escolhidas
         # Caso tenha menos do que o escolhido o num de questões fica com o tamanho da lista de questões
         st.session_state.numQuestoes = len(st.session_state.dadosFiltrados) if len(st.session_state.dadosFiltrados) < numQuestoes else numQuestoes
+        if st.session_state.numQuestoes == 0:
+            st.warning("⚠️ Não foi encontrado nenhum resultado para esse capitulo ainda!")
+            st.stop()
         
         # Randomiza as questões escolhidas
         st.session_state.randIndice = sample(range(0, len(st.session_state.dadosFiltrados)), st.session_state.numQuestoes)
