@@ -33,7 +33,6 @@ def responder(resposta):
     if resposta.lower() == resposta_certa.lower():
         # Caso resposta correta assiona o toast de acerto e aumenta os pontos
         st.session_state.ultimo_toast = ("Acertou! 🎉", "✅")
-        st.session_state.pontos += 1
     else:
         # Caso errado assiona o toast de erro e coloca no indice da pergunta como uma resposta errada (false)
         st.session_state.ultimo_toast = ("Errou! 😥", "❌")
@@ -99,7 +98,6 @@ if not st.session_state.config:
         st.session_state.respondidos = [False for i in range(st.session_state.numQuestoes)]
         st.session_state.respostas = [True for i in range(st.session_state.numQuestoes)] # repostas corretas ou falsas
         st.session_state.erros = []
-        st.session_state.pontos = 0
         st.session_state.config = True
         st.rerun()
     
@@ -115,7 +113,7 @@ if st.session_state.gameOver:
     # Total de perguntas selecionadas
     total = st.session_state.numQuestoes
     # Numero de acertos (mas só mostra se o numero de acertos não for maior que o total)
-    acertos = st.session_state.pontos if st.session_state.pontos <= total else 0
+    acertos = sum(st.session_state.respostas)
 
     # Porcentagens de pontos feitos (caso maior que o número de questões é zerado)
     pontos_porcent = acertos / total if acertos <= total else 0
