@@ -70,8 +70,6 @@ if not st.session_state.config:
     # Carrega tela de configurações do quiz
     result = initial_choice(len(st.session_state.dados))
 
-    
-
     if result is not None:
         capitulos, numQuestoes = result # Define os capítulos selecionados e o num de questões
 
