@@ -14,3 +14,6 @@ __pycache__/
 #variaveis de ambiente
 .env
 .env.*
+
+#testes
+*test*

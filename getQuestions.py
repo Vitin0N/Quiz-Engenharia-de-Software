@@ -27,7 +27,6 @@ def get_questions():
             print(f'Error: Erro ao buscar as perguntas {e}')
             return []
         
-        
-        return all_questions
+    return all_questions
 
 
