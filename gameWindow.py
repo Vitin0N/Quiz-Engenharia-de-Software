@@ -149,12 +149,12 @@ if st.session_state.gameOver:
         with st.container():
             st.markdown(f"""
 ## Questão: 
-{pergunta_atual['Questão']}
+{pergunta_atual['Questão'].strip()}
             
 ### Resposta: {pergunta_atual['Resposta']}
             
 #### Referência:
-{pergunta_atual['Citações e referências']}
+{pergunta_atual['Citações e referências'].strip()}
 
 ---
 """)
@@ -232,12 +232,12 @@ if(not st.session_state.respostas[st.session_state.indice]):
 ---
                             
 ## Questão: 
-{pergunta_atual['Questão']}
+{pergunta_atual['Questão'].strip()}
             
 ### Resposta: {pergunta_atual['Resposta']}
             
 #### Referência:
-{pergunta_atual['Citações e referências']}
+{pergunta_atual['Citações e referências'].strip()}
 
 ---
 """)
