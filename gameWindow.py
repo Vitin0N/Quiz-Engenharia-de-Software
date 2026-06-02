@@ -224,8 +224,15 @@ with prox: # Botão proximo
         st.rerun()
 
 # Mostra a reposta correta caso a pessoa tenha errado
-if(not st.session_state.respostas[st.session_state.indice]):
+if(st.session_state.respondidos[st.session_state.indice]):
     pergunta_atual = st.session_state.dadosFiltrados[st.session_state.randIndice[st.session_state.indice]]
+
+    if st.session_state.respostas[st.session_state.indice]:
+        st.success("Você ACERTOU a questão!\n")
+
+    else:
+        st.error("Você ERROU a questão!\n")
+        
 
     with st.container():
                 st.markdown(f"""
