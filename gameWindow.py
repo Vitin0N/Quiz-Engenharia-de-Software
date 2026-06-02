@@ -223,29 +223,38 @@ with prox: # Botão proximo
         st.session_state.indice += 1
         st.rerun()
 
-# Mostra a reposta correta caso a pessoa tenha errado
-if(st.session_state.respondidos[st.session_state.indice]):
-    pergunta_atual = st.session_state.dadosFiltrados[st.session_state.randIndice[st.session_state.indice]]
+    # Mostra a reposta correta caso a pessoa tenha errado
+    if(st.session_state.respondidos[st.session_state.indice]):
+        pergunta_atual = st.session_state.dadosFiltrados[st.session_state.randIndice[st.session_state.indice]]
 
     if st.session_state.respostas[st.session_state.indice]:
-        st.success("Você ACERTOU a questão! Parabéns 🤩\n")
+        st.success(f"""
+# ✅ Você ACERTOU a questão! Parabéns 🤩
 
-    else:
-        st.error("Você ERROU a questão! Você consegue na próxima 😥\n")
-        
-
-    with st.container():
-                st.markdown(f"""
 ---
-                            
-## Questão: 
+
+## Questão
 {pergunta_atual['Questão'].strip()}
-            
-### Resposta: {pergunta_atual['Resposta']}
-            
-#### Referência:
+
+### Resposta
+{pergunta_atual['Resposta']}
+
+#### Referência
 {pergunta_atual['Citações e referências'].strip()}
+""")
+    else:
+        st.error(f"""
+# ❌ Você ERROU a questão! Você consegue na próxima 😥
 
 ---
+
+## Questão
+{pergunta_atual['Questão'].strip()}
+
+### Resposta
+{pergunta_atual['Resposta']}
+
+#### Referência
+{pergunta_atual['Citações e referências'].strip()}
 """)
 
