@@ -8,6 +8,22 @@ def initial_choice(max_value):
     temos no banco de questão
     '''
 
+    # Lista de Cápitulos escolhido pelo o usuário
+    escolhas_cap = st.pills(label='Qual cápitulo deseja simular a prova', 
+                            options=['Capítulo 1', 'Capítulo 2', 'Capítulo 3', 
+                                     'Capítulo 5', 'Capítulo 7', 'Testes, capítulo 8', 
+                                     'Gerenciamento de Projetos, capítulo 22', 'Sistemas Legados, capítulo 8 '], 
+                            selection_mode='multi')
+    
+    
+    # Número de questão simuladas pelo o usuário
+    num_questoes = st.number_input(label=f'Escolha o número de questões para simular. Max({max_value})', 
+                                   min_value=5,
+                                   max_value=max_value,
+                                   value=20, 
+                                   step=1
+                                    )
+    
     if 'extra_sheets' not in st.session_state:
         st.session_state.extra_sheets = []
     
@@ -57,23 +73,6 @@ def initial_choice(max_value):
                     st.error("Link inválido! Certifique-se de colar a URL completa da planilha.")
             else:
                 st.warning("Insira um link antes de adicionar!")
-
-
-    # Lista de Cápitulos escolhido pelo o usuário
-    escolhas_cap = st.pills(label='Qual cápitulo deseja simular a prova', 
-                            options=['Capítulo 1', 'Capítulo 2', 'Capítulo 3', 
-                                     'Capítulo 5', 'Capítulo 7', 'Testes, capítulo 8', 
-                                     'Gerenciamento de Projetos, capítulo 22', 'Sistemas Legados, capítulo 8 '], 
-                            selection_mode='multi')
-    
-    
-    # Número de questão simuladas pelo o usuário
-    num_questoes = st.number_input(label=f'Escolha o número de questões para simular. Max({max_value})', 
-                                   min_value=5,
-                                   max_value=max_value,
-                                   value=20, 
-                                   step=1
-                                    )
     
     # Botão iniciar só é ativado quando o usuário escolher pelo menos 1 capítulo a ser simulado
     iniciar = st.button('iniciar', 
