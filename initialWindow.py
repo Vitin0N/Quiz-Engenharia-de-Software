@@ -11,47 +11,52 @@ def initial_choice(max_value):
     if 'extra_sheets' not in st.session_state:
         st.session_state.extra_sheets = []
     
-    st.subheader('Escolha como deseja fazer o questionário!',text_alignment='center')
+    st.subheader('Escolha como deseja fazer o questionário!', anchor=False)
 
-    novo_banco = st.text_input(
-        'Adicionar um novo banco de questões (do google sheet)!'
-    )
+    # Uso de st.form para limpar o campo automaticamente após o envio
+    with st.form("form_novo_banco", clear_on_submit=True):
+        novo_banco = st.text_input('Adicionar um novo banco de questões (do google sheet)!')
+        submit_banco = st.form_submit_button("Adicionar Banco")
 
-    if novo_banco.strip():
-        sheet_id = re.search(r"/d/([a-zA-Z0-9-_]+)", novo_banco)
-        sheet_gid = re.search(r"gid=([0-9]+)", novo_banco)
+        if submit_banco:
+            if novo_banco.strip():
+                # Correção do Regex: Armazenamos o objeto da busca
+                match_id = re.search(r"/d/([a-zA-Z0-9-_]+)", novo_banco)
+                match_gid = re.search(r"gid=([0-9]+)", novo_banco)
 
-        ja_existe = False
+                if match_id and match_gid:
+                    # Extraímos as strings reais usando .group(1)
+                    sheet_id = match_id.group(1)
+                    sheet_gid = match_gid.group(1)
 
-        # verifica nos secrets
-        for id_secret, gid_secret in zip(
-            st.secrets["SHEET_ID"],
-            st.secrets["SHEET_GID"]
-        ):
-            if sheet_id == id_secret and str(sheet_gid) == str(gid_secret):
-                ja_existe = True
-                break
+                    ja_existe = False
 
-        # verifica nos extras
-        if not ja_existe:
-            ja_existe = any(
-                s["id"] == sheet_id and str(s["gid"]) == str(sheet_gid)
-                for s in st.session_state.extra_sheets
-            )
+                    # verifica nos secrets
+                    for id_secret, gid_secret in zip(st.secrets["SHEET_ID"], st.secrets["SHEET_GID"]):
+                        if sheet_id == id_secret and str(sheet_gid) == str(gid_secret):
+                            ja_existe = True
+                            break
 
-        if ja_existe:
-            st.warning("Esse banco já está cadastrado!")
-        else:
-            st.session_state.extra_sheets.append({
-                "id": sheet_id,
-                "gid": sheet_gid
-            })
+                    # verifica nos extras
+                    if not ja_existe:
+                        ja_existe = any(
+                            s["id"] == sheet_id and str(s["gid"]) == str(sheet_gid)
+                            for s in st.session_state.extra_sheets
+                        )
 
-            st.session_state.recarregar_dados = True
-            st.success("Banco de questões adicionado!")
-            st.rerun()
-    else:
-        st.error("Link inválido!")
+                    if ja_existe:
+                        st.warning("Esse banco já está cadastrado!")
+                    else:
+                        st.session_state.extra_sheets.append({
+                            "id": sheet_id,
+                            "gid": sheet_gid
+                        })
+                        st.session_state.recarregar_dados = True
+                        st.toast("Banco de questões adicionado com sucesso!", icon="✅")
+                else:
+                    st.error("Link inválido! Certifique-se de colar a URL completa da planilha.")
+            else:
+                st.warning("Insira um link antes de adicionar!")
 
 
     # Lista de Cápitulos escolhido pelo o usuário

@@ -6,20 +6,18 @@ def get_questions(extra_sheet=None):
     Busca os registros das perguntas no banco de questões retirando as questões testes de Alan
     retorna uma lista de dicionários (formato padrão JSON) 
     '''
-    sheet_ids = list(st.secrets["SHEET_ID"])
-    sheet_gids = list(st.secrets["SHEET_GID"])
+    sheets = list(zip(st.secrets["SHEET_ID"], st.secrets["SHEET_GID"]))
 
     if extra_sheet:
         for sheet in extra_sheet:
-            sheet_ids.append(sheet['id'])
-            sheet_gids.append(sheet['gid'])
+            sheets.append((sheet['id'], sheet['gid']))
 
-    sheet_ids = list(set(sheet_ids))
-    sheet_gids = list(set(sheet_gids))
+    # Agora o set remove duplicatas garantindo que o par [ID, GID] fique sempre junto
+    sheets = list(set(sheets))
 
     all_questions = []
 
-    for sheet_id, sheet_gid in zip(sheet_ids, sheet_gids):
+    for sheet_id, sheet_gid in sheets:
         url = f'https://docs.google.com/spreadsheets/d/{sheet_id}/export?format=csv&gid={sheet_gid}'
         try:
             # Ler os dados atualizados do banco de questão
