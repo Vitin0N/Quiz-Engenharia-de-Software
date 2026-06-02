@@ -1,13 +1,21 @@
 import pandas as pd
 import streamlit as st
 
-def get_questions():
+def get_questions(extra_sheet=None):
     '''
     Busca os registros das perguntas no banco de questões retirando as questões testes de Alan
     retorna uma lista de dicionários (formato padrão JSON) 
     '''
-    sheet_ids = st.secrets["SHEET_ID"]
-    sheet_gids = st.secrets["SHEET_GID"]
+    sheet_ids = list(st.secrets["SHEET_ID"])
+    sheet_gids = list(st.secrets["SHEET_GID"])
+
+    if extra_sheet:
+        for sheet in extra_sheet:
+            sheet_ids.append(sheet['id'])
+            sheet_gids.append(sheet['gid'])
+
+    sheet_ids = list(set(sheet_ids))
+    sheet_gids = list(set(sheet_gids))
 
     all_questions = []
 

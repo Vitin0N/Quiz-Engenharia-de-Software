@@ -59,8 +59,11 @@ if 'dados' not in st.session_state:
     with st.spinner('Carregando questionario.'):
         st.session_state.dados = get_questions()
 
+    st.session_state.recarregar_dados = False
     st.session_state.config = False 
     st.session_state.gameOver = False
+
+    st.session_state.recarregar_dados = False
 
 #=======================
 # Tela de Configurações
@@ -69,6 +72,13 @@ if not st.session_state.config:
 
     # Carrega tela de configurações do quiz
     result = initial_choice(len(st.session_state.dados))
+    extra_sheets = st.session_state.get('extra_sheets', [])
+
+    if st.session_state.get("recarregar_dados", False):
+        st.session_state.dados = get_questions(
+            st.session_state.extra_sheets
+        )
+        st.session_state.recarregar_dados = False
 
     if result is not None:
         capitulos, numQuestoes = result # Define os capítulos selecionados e o num de questões
