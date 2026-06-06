@@ -1,87 +1,48 @@
+import pandas as pd
 import streamlit as st
-import re
 
-def initial_choice(max_value):
+def get_questions(extra_sheet=None):
     '''
-    Página inicial do quiz, mostra quais cápitulos se pode fazer o quiz
-    é necessario passar o 'max_value' para podermos identificar quantas questões
-    temos no banco de questão
+    Busca os registros das perguntas no banco de questões.
+    Retorna uma lista de dicionários (formato padrão JSON).
     '''
-
-    if 'extra_sheets' not in st.session_state:
-        st.session_state.extra_sheets = []
     
-    st.subheader('Escolha como deseja fazer o questionário!', anchor=False)
+    # 1. Pega as informações do secrets (usando fallback para lista vazia)
+    # Convertendo direto para lista para facilitar a manipulação
+    secret_ids = list(st.secrets.get("SHEET_ID", []))
+    secret_gids = list(st.secrets.get("SHEET_GID", []))
 
-    # 1. Uso de st.form para evitar duplo envio (loop)
-    with st.form("form_novo_banco", clear_on_submit=True):
-        novo_banco = st.text_input('Adicionar um novo banco de questões (do google sheet)!')
-        submit_banco = st.form_submit_button("Adicionar Banco")
+    # 2. Une os IDs e GIDs em pares (Tuplas) para que não se misturem
+    planilhas = list(zip(secret_ids, secret_gids))
 
-        if submit_banco:
-            if novo_banco.strip():
-                match_id = re.search(r"/d/([a-zA-Z0-9-_]+)", novo_banco)
-                match_gid = re.search(r"gid=([0-9]+)", novo_banco)
+    # 3. Adiciona as planilhas extras enviadas pelo usuário
+    if extra_sheet:
+        for sheet in extra_sheet:
+            planilhas.append((sheet['id'], sheet['gid']))
 
-                if match_id and match_gid:
-                    sheet_id = match_id.group(1)
-                    sheet_gid = match_gid.group(1)
-                    ja_existe = False
+    # 4. Remove duplicatas garantindo que o par (id, gid) continue junto
+    planilhas_unicas = list(set(planilhas))
 
-                    # verifica nos secrets
-                    for id_secret, gid_secret in zip(st.secrets["SHEET_ID"], st.secrets["SHEET_GID"]):
-                        if sheet_id == id_secret and str(sheet_gid) == str(gid_secret):
-                            ja_existe = True
-                            break
+    all_questions = []
 
-                    # verifica nos extras
-                    if not ja_existe:
-                        ja_existe = any(
-                            s["id"] == sheet_id and str(s["gid"]) == str(sheet_gid)
-                            for s in st.session_state.extra_sheets
-                        )
+    # 5. Baixa os dados de cada planilha
+    for sheet_id, sheet_gid in planilhas_unicas:
+        # Monta a URL de exportação em CSV do Google Sheets
+        url = f"https://docs.google.com/spreadsheets/d/{sheet_id}/export?format=csv&gid={sheet_gid}"
+        
+        try:
+            # Lê o CSV usando pandas
+            df = pd.read_csv(url)
+            
+            # (OPCIONAL) Retire as questões testes de Alan. 
+            # ATENÇÃO: Substitua 'Nome da Coluna' pelo nome exato da coluna onde está o nome do autor/tipo
+            # df = df[df['Nome da Coluna'] != 'Alan']
+            
+            # Converte o DataFrame para uma lista de dicionários e adiciona à lista final
+            all_questions.extend(df.to_dict('records'))
+            
+        except Exception as e:
+            # Mostra um erro na tela em vez de quebrar o site inteiro caso o link seja inválido
+            st.error(f"Erro ao carregar a planilha ID {sheet_id}. Verifique se o link é público. Erro: {e}")
 
-                    if ja_existe:
-                        st.warning("Esse banco já está cadastrado!")
-                    else:
-                        st.session_state.extra_sheets.append({
-                            "id": sheet_id,
-                            "gid": sheet_gid
-                        })
-
-                        st.session_state.recarregar_dados = True
-                        st.success("Banco de questões adicionado!")
-                else:
-                    st.error("Link inválido! Certifique-se de colar a URL completa.")
-            else:
-                st.warning("Por favor, insira um link.")
-
-    # Lista de Cápitulos escolhidos pelo usuário
-    escolhas_cap = st.pills(label='Qual cápitulo deseja simular a prova', 
-                            options=['Capítulo 1', 'Capítulo 2', 'Capítulo 3', 
-                                     'Capítulo 5', 'Capítulo 7', 'Testes, capítulo 8', 
-                                     'Gerenciamento de Projetos, capítulo 22', 'Sistemas Legados, capítulo 8 '], 
-                            selection_mode='multi')
-    
-    if max_value < 1:
-        st.warning("⚠️ O banco de questões está vazio. Adicione questões para continuar.")
-        st.stop() # Para a execução aqui para não travar o number_input
-
-    # Ajuste dinâmico dos limites
-    limite_minimo = min(5, max_value)
-    valor_padrao = min(20, max_value)
-
-    # Número de questões simuladas pelo usuário
-    num_questoes = st.number_input(label=f'Escolha o número de questões para simular. Max({max_value})', 
-                                   min_value=limite_minimo,
-                                   max_value=max_value,
-                                   value=valor_padrao, 
-                                   step=1
-                                   )
-    
-    # Botão iniciar só é ativado quando o usuário escolher pelo menos 1 capítulo a ser simulado
-    iniciar = st.button('iniciar', 
-                        disabled=(len(escolhas_cap) == 0)
-                        )
-    if iniciar:
-        return escolhas_cap, num_questoes
+    return all_questions
