@@ -1,10 +1,9 @@
 import streamlit as st
-import time
 from getQuestions import get_questions
 from initialWindow import initial_choice
 from random import sample
 
-st.set_page_config('Quiz Eng. de Software I', page_icon='🕹️') # Setup do cabeçalho da página
+st.set_page_config('Quiz Eng. de Software I', page_icon='🕹️') 
 
 def reiniciar_jogo():
     for key in list(st.session_state.keys()):
@@ -28,42 +27,30 @@ def responder(resposta):
     
     st.session_state.respondeu = True
     st.session_state.respondidos[st.session_state.indice] = True
-    resposta_certa = pergunta_atual['Resposta'].strip()
+    
+    # Pega a pergunta atual com base no estado para evitar erros de escopo
+    pergunta_atual_local = st.session_state.dadosFiltrados[st.session_state.randIndice[st.session_state.indice]]
+    resposta_certa = pergunta_atual_local['Resposta'].strip()
 
     if resposta.lower() == resposta_certa.lower():
-        # Caso resposta correta assiona o toast de acerto e aumenta os pontos
         st.session_state.ultimo_toast = ("Acertou! 🎉", "✅")
     else:
-        # Caso errado assiona o toast de erro e coloca no indice da pergunta como uma resposta errada (false)
         st.session_state.ultimo_toast = ("Errou! 😥", "❌")
         st.session_state.respostas[st.session_state.indice] = False
         st.session_state.erros.append(st.session_state.indice)
-
-    #========================================
-    # Definir próxima pergunta ou fim de jogo
-    #========================================
-
-    # Caso ainda tenha alguma pergunta para responder o Quiz continua
-    if st.session_state.indice + 1 < st.session_state.numQuestoes: # Vai para próxima pergunta
-        st.session_state.respondeu = False # Define a próxima pergunta como não respondida
-
-    # Caso não tenha mais questões inicializa a tela de Fim de Jogo
-    else: 
-        st.session_state.gameOver = True
-        st.session_state.respondeu = False
+    
+    # NOTA: Removida a lógica de "gameOver" daqui. Ela foi passada para o botão da última questão.
 
 #=============================================
 # Inicialização dos dados do banco de questão
 #=============================================
 if 'dados' not in st.session_state:
-    with st.spinner('Carregando questionario.'):
+    with st.spinner('Carregando questionário...'):
         st.session_state.dados = get_questions()
 
     st.session_state.recarregar_dados = False
     st.session_state.config = False 
     st.session_state.gameOver = False
-
-    st.session_state.recarregar_dados = False
 
 #=======================
 # Tela de Configurações
@@ -72,39 +59,32 @@ if not st.session_state.config:
 
     # Carrega tela de configurações do quiz
     result = initial_choice(len(st.session_state.dados))
-    extra_sheets = st.session_state.get('extra_sheets', [])
-
+    
     if st.session_state.get("recarregar_dados", False):
-        st.session_state.dados = get_questions(
-            st.session_state.extra_sheets
-        )
+        extra_sheets = st.session_state.get('extra_sheets', [])
+        st.session_state.dados = get_questions(extra_sheets)
         st.session_state.recarregar_dados = False
 
     if result is not None:
-        capitulos, numQuestoes = result # Define os capítulos selecionados e o num de questões
-
+        capitulos, numQuestoes = result 
 
         st.session_state.capitulos = capitulos
 
         st.session_state.dadosFiltrados = [x for x in st.session_state.dados
                                            if any(x['Tópico da questão'].startswith(cap) for cap in capitulos)]
         
-        # Verifica se tem uma quantidade de questões escolhidas
-        # Caso tenha menos do que o escolhido o num de questões fica com o tamanho da lista de questões
         st.session_state.numQuestoes = len(st.session_state.dadosFiltrados) if len(st.session_state.dadosFiltrados) < numQuestoes else numQuestoes
+        
         if st.session_state.numQuestoes == 0:
-            st.warning("⚠️ Não foi encontrado nenhum resultado para esse capitulo ainda!")
+            st.warning("⚠️ Não foi encontrado nenhum resultado para esse capítulo ainda!")
             st.stop()
         
-        # Randomiza as questões escolhidas
         st.session_state.randIndice = sample(range(0, len(st.session_state.dadosFiltrados)), st.session_state.numQuestoes)
 
-        # Verifica se o usuário responder para disabilitar os botões de resposta (não funciona corretamente)
         st.session_state.respondeu = False
-
         st.session_state.indice = 0
-        st.session_state.respondidos = [False for i in range(st.session_state.numQuestoes)]
-        st.session_state.respostas = [True for i in range(st.session_state.numQuestoes)] # repostas corretas ou falsas
+        st.session_state.respondidos = [False for _ in range(st.session_state.numQuestoes)]
+        st.session_state.respostas = [True for _ in range(st.session_state.numQuestoes)] 
         st.session_state.erros = []
         st.session_state.config = True
         st.rerun()
@@ -118,32 +98,28 @@ if st.session_state.gameOver:
     st.balloons()
     st.title("🏆 Fim de Jogo!")
 
-    # Total de perguntas selecionadas
     total = st.session_state.numQuestoes
-    # Numero de acertos (mas só mostra se o numero de acertos não for maior que o total)
     acertos = sum(st.session_state.respostas)
 
-    # Porcentagens de pontos feitos (caso maior que o número de questões é zerado)
     pontos_porcent = acertos / total if acertos <= total else 0
 
-    # Acertos finais
     st.metric('Pontuação final', f'{acertos}/{total}')
 
     col1, col2 = st.columns([3,1])
 
     with col1:
-        st.progress(pontos_porcent) # Barra de porcentagem de questões acertadas
+        st.progress(pontos_porcent) 
     with col2:
         st.write(f'Você acertou {pontos_porcent*100:.1f}%')
 
     if acertos == total:
         st.success("Parabéns! Você gabaritou! 🤓")
     elif acertos > total:
-        st.error("Como tu ganhou mais pontos que questões feitas, já ta baguçando já boy...\n" 
-                "NÃO APERTE O BOTÃO DE RESPOSTA VÁRIAS VEZES DA PROXIMA VEZ!!!")   
-    elif acertos / total >= 0.7:
+        st.error("Como tu ganhou mais pontos que questões feitas, já ta bagunçando já boy...\n" 
+                 "NÃO APERTE O BOTÃO DE RESPOSTA VÁRIAS VEZES DA PRÓXIMA VEZ!!!")   
+    elif pontos_porcent >= 0.7:
         st.info("Mandou bem!")   
-    elif acertos > total / 2: # Taxa de acertos entre 50% e 69% da prova
+    elif pontos_porcent > 0.5: 
         st.info("Podemos melhorar, eu confio!")
     else:
         st.warning("Precisa estudar mais um pouco...")
@@ -152,19 +128,18 @@ if st.session_state.gameOver:
         reiniciar_jogo()
 
     if len(st.session_state.erros):
-        st.markdown("# Questões erradas: \n"+
-                    "---\n")
-    for i in st.session_state.erros:
-        pergunta_atual = st.session_state.dadosFiltrados[st.session_state.randIndice[i]]
-        with st.container():
-            st.markdown(f"""
+        st.markdown("# Questões erradas: \n---\n")
+        for i in st.session_state.erros:
+            pergunta_errada = st.session_state.dadosFiltrados[st.session_state.randIndice[i]]
+            with st.container():
+                st.markdown(f"""
 ## Questão: 
-{pergunta_atual['Questão'].strip()}
+{pergunta_errada['Questão'].strip()}
             
-### Resposta: {pergunta_atual['Resposta']}
+### Resposta: {pergunta_errada['Resposta']}
             
 #### Referência:
-{pergunta_atual['Citações e referências'].strip()}
+{pergunta_errada['Citações e referências'].strip()}
 
 ---
 """)
@@ -172,9 +147,9 @@ if st.session_state.gameOver:
     st.stop()
 
 #=====================
-#  Inteface do quiz
+#  Interface do quiz
 #=====================
-indice_atual = st.session_state.indice # Quantas questões foram respondidas
+indice_atual = st.session_state.indice 
 pergunta_atual = st.session_state.dadosFiltrados[st.session_state.randIndice[indice_atual]] 
 
 progresso = (st.session_state.indice) / st.session_state.numQuestoes
@@ -189,18 +164,18 @@ with head2:
     if st.button('Reiniciar'):
         reiniciar_jogo()
 
-with st.container(border=True): # Pergunta atual fica dentro de uma caixinha em destaque
-    st.markdown(f'### {pergunta_atual['Questão']}')
+with st.container(border=True): 
+    # ERRO DE SINTAXE CORRIGIDO AQUI (aspas duplas por fora)
+    st.markdown(f"### {pergunta_atual['Questão']}")
 
 st.write('Essa afirmação é:')
 
-col1, col2 = st.columns(2) # Colunas onde fica alocados os botões de resposta
-
-ant, prox = st.columns(2) # Colunas onde ficam o anterior e o proximo
+col1, col2 = st.columns(2) 
+ant, prox = st.columns(2) 
 
 ja_respondeu = st.session_state.respondeu or st.session_state.respondidos[st.session_state.indice]
 
-with col1: # Botão de resposta verdadeira
+with col1: 
     st.button('VERDADEIRA ✅', 
                 use_container_width=True, 
                 disabled=ja_respondeu,
@@ -208,7 +183,7 @@ with col1: # Botão de resposta verdadeira
                 args=('verdadeira',)
             )
 
-with col2: # Botão de resposta falsa
+with col2: 
     st.button('FALSA ❌', 
                 use_container_width=True, 
                 disabled=ja_respondeu,
@@ -216,33 +191,34 @@ with col2: # Botão de resposta falsa
                 args=('falsa',)
                 )
 
-# Toast de validação da resposta
 if 'ultimo_toast' in st.session_state and st.session_state.ultimo_toast:
     msg, icon = st.session_state.ultimo_toast
     st.toast(msg, icon=icon)
     st.session_state.ultimo_toast = None
 
-
-with ant: # Botão de anterior
+with ant: 
     if st.button("Anterior", use_container_width=True, disabled=(st.session_state.indice == 0)):
         st.session_state.indice -= 1
+        st.session_state.respondeu = False # Resetar flag visual
         st.rerun()
 
-with prox: # Botão proximo
-    if st.button("Próximo", use_container_width=True, disabled=(st.session_state.respondidos[st.session_state.indice] == False)):
-        st.session_state.indice += 1
-        st.rerun()
+with prox: 
+    # LÓGICA CORRIGIDA: Se for a última questão, exibe botão para finalizar
+    if st.session_state.indice == st.session_state.numQuestoes - 1:
+        if st.button("Finalizar Quiz", use_container_width=True, disabled=(not st.session_state.respondidos[st.session_state.indice])):
+            st.session_state.gameOver = True
+            st.rerun()
+    else:
+        if st.button("Próximo", use_container_width=True, disabled=(not st.session_state.respondidos[st.session_state.indice])):
+            st.session_state.indice += 1
+            st.session_state.respondeu = False # Resetar flag visual para a próxima
+            st.rerun()
 
-# Mostra a reposta correta caso a pessoa tenha errado
-if(st.session_state.respondidos[st.session_state.indice]):
-    pergunta_atual = st.session_state.dadosFiltrados[st.session_state.randIndice[st.session_state.indice]]
-
+if st.session_state.respondidos[st.session_state.indice]:
     if st.session_state.respostas[st.session_state.indice]:
         st.success(f"""
 # ✅ Você ACERTOU a questão! Parabéns 🤩
-
 ---
-
 ## Questão
 {pergunta_atual['Questão'].strip()}
 
@@ -255,9 +231,7 @@ if(st.session_state.respondidos[st.session_state.indice]):
     else:
         st.error(f"""
 # ❌ Você ERROU a questão! Você consegue na próxima 😥
-
 ---
-
 ## Questão
 {pergunta_atual['Questão'].strip()}
 
@@ -267,4 +241,3 @@ if(st.session_state.respondidos[st.session_state.indice]):
 #### Referência
 {pergunta_atual['Citações e referências'].strip()}
 """)
-
